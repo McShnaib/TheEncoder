@@ -25,7 +25,7 @@ import logging
 
 from encoder import detect_columns, ColumnConfig, apply_encoding, save_encoded_excel
 from sps_generator import generate_sps_syntax, save_sps_file
-from utils import sanitize_variable_name, is_likely_likert, is_multi_response
+from utils import sanitize_variable_name, generate_unique_var_names, is_likely_likert, is_multi_response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,6 +56,8 @@ if 'encoded_path' not in st.session_state:
     st.session_state.encoded_path = None
 if 'sps_path' not in st.session_state:
     st.session_state.sps_path = None
+if 'unique_var_names' not in st.session_state:
+    st.session_state.unique_var_names = {}
 
 
 def get_todo_status() -> Dict[str, bool]:
@@ -154,13 +156,25 @@ def render_column_card(col_name: str, col_info: Dict, sanitize_names: bool):
     
     # Initialize config if not exists
     if col_name not in st.session_state.column_configs:
-        default_type = 'Likert' if is_likely_likert(col_info['unique_values']) else 'Nominal'
+        # Detect if numeric, ordinal, or nominal
+        if col_info['is_numeric']:
+            default_type = 'Scale'
+        elif is_likely_likert(col_info['unique_values']):
+            default_type = 'Ordinal'
+        else:
+            default_type = 'Nominal'
+        # Use pre-generated unique name or fallback to simple sanitization
+        if sanitize_names and col_name in st.session_state.unique_var_names:
+            sanitized = st.session_state.unique_var_names[col_name]
+        else:
+            sanitized = sanitize_variable_name(col_name) if sanitize_names else col_name
+        
         st.session_state.column_configs[col_name] = {
             'encoding_type': default_type,
             'start_value': 1,
             'direction': 'Ascending',
             'treat_missing': True,
-            'sanitized_name': sanitize_variable_name(col_name) if sanitize_names else col_name
+            'sanitized_name': sanitized
         }
     
     config = st.session_state.column_configs[col_name]
@@ -179,7 +193,12 @@ def render_column_card(col_name: str, col_info: Dict, sanitize_names: bool):
                 st.warning(f"⚠️ Multi-response detected ({n_unique} unique combinations)")
                 st.caption("Contains comma/semicolon separators. Currently treating as atomic strings.")
             else:
-                type_hint = "Likely Likert-scale" if is_likely_likert(col_info['unique_values']) else "Categorical"
+                if col_info['is_numeric']:
+                    type_hint = "Scale (numeric)"
+                elif is_likely_likert(col_info['unique_values']):
+                    type_hint = "Ordinal (ordered categories)"
+                else:
+                    type_hint = "Nominal (categories)"
                 st.caption(f"📊 {n_unique} unique values | {n_missing} missing | {type_hint}")
         
         with col2:
@@ -199,14 +218,17 @@ def render_column_card(col_name: str, col_info: Dict, sanitize_names: bool):
         col_a, col_b, col_c = st.columns(3)
         
         with col_a:
-            encoding_type = st.selectbox(
-                "Encoding Type",
-                options=['Likert', 'Nominal', 'Ignore'],
-                index=['Likert', 'Nominal', 'Ignore'].index(config['encoding_type']),
+            measure_type = st.selectbox(
+                "Measure (SPSS Variable Level)",
+                options=['Ordinal', 'Nominal', 'Scale', 'Ignore'],
+                index=['Ordinal', 'Nominal', 'Scale', 'Ignore'].index(config['encoding_type']) if config['encoding_type'] in ['Ordinal', 'Nominal', 'Scale', 'Ignore'] else 0,
                 key=f"type_{col_name}",
-                help="Likert: ordinal scale | Nominal: categorical | Ignore: don't encode"
+                help="Ordinal: ordered categories (e.g., Likert scales) | Nominal: unordered categories | Scale: continuous numeric | Ignore: don't encode"
             )
-            config['encoding_type'] = encoding_type
+            # Update config with new value (backward compatible: Likert -> Ordinal)
+            if measure_type == 'Likert':
+                measure_type = 'Ordinal'
+            config['encoding_type'] = measure_type
         
         with col_b:
             start_value = st.number_input(
@@ -236,7 +258,7 @@ def render_column_card(col_name: str, col_info: Dict, sanitize_names: bool):
         )
         config['treat_missing'] = treat_missing
         
-        if encoding_type != 'Ignore':
+        if measure_type != 'Ignore':
             st.markdown("---")
             st.markdown("**Reorder Options** (drag with ↑ ↓ buttons)")
             
@@ -264,7 +286,7 @@ def render_column_card(col_name: str, col_info: Dict, sanitize_names: bool):
             preview_config = ColumnConfig(
                 column_name=col_name,
                 unique_values=current_order,
-                encoding_type=encoding_type,
+                encoding_type=measure_type,
                 start_value=config['start_value'],
                 direction=config['direction']
             )
@@ -315,6 +337,11 @@ def main():
                 with st.spinner("Detecting columns..."):
                     column_info = detect_columns(df)
                     st.session_state.column_info = column_info
+                    
+                    # Generate unique variable names (handles Arabic and duplicates)
+                    if sanitize_names:
+                        unique_names = generate_unique_var_names(list(df.columns))
+                        st.session_state.unique_var_names = unique_names
             
             st.markdown("---")
             
@@ -385,6 +412,13 @@ def main():
                         if col in configs
                     }
                     
+                    # Build measure types mapping for VARIABLE LEVEL
+                    measure_types = {
+                        configs[col].sanitized_name: configs[col].encoding_type
+                        for col in df.columns
+                        if col in configs
+                    }
+                    
                     # Generate SPSS syntax
                     save_path = encoded_path.replace('.xlsx', '.sav') if include_save else None
                     sps_syntax = generate_sps_syntax(
@@ -393,7 +427,9 @@ def main():
                         original_names=original_names,
                         sheet_name='Sheet1',
                         include_save=include_save,
-                        save_path=save_path
+                        save_path=save_path,
+                        use_relative_path=True,  # Use relative path for downloaded files
+                        measure_types=measure_types  # Set SPSS variable levels
                     )
                     st.session_state.sps_syntax = sps_syntax
                     
@@ -432,15 +468,34 @@ def main():
                     st.subheader("📜 SPSS Syntax Preview")
                     st.code(st.session_state.sps_syntax, language='sql')
                     
-                    # Download .sps file
+                    # Download .sps file with UTF-8 BOM for Arabic text support
+                    sps_bytes = st.session_state.sps_syntax.encode('utf-8-sig')
                     st.download_button(
                         label="⬇️ Download SPSS Syntax (.sps)",
-                        data=st.session_state.sps_syntax,
+                        data=sps_bytes,
                         file_name="auto_import.sps",
                         mime="text/plain"
                     )
                 
-                st.info("💡 **Next Steps:** Open the .sps file in IBM SPSS and run it to import the encoded data with value labels.")
+                st.success("📥 **Files ready for download!**")
+                st.markdown("### 📋 Next Steps:")
+                st.markdown("""
+                1. **Download both files** using the buttons above
+                2. **Save them to the SAME folder** on your computer
+                3. **Open the .sps file in a text editor** (Notepad, etc.)
+                4. **Edit the CD command** to point to your folder:
+                   ```
+                   CD 'C:\\Users\\YourName\\Documents\\MySurvey'.
+                   ```
+                   Replace with your actual folder path!
+                5. **Save the .sps file**
+                6. **Open the .sps file in IBM SPSS**
+                7. **Run the script** (Ctrl+A to select all, then Ctrl+R to run)
+                
+                ⚠️ **Important:** The CD command tells SPSS where to find your Excel file. If you skip step 4, you'll get Error 2052!
+                """)
+                
+                st.info("💡 **Tip:** Keep both files together and remember which folder you saved them in.")
         
         except Exception as e:
             st.error(f"❌ Error processing file: {str(e)}")

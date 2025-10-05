@@ -20,7 +20,7 @@ class ColumnConfig:
         self,
         column_name: str,
         unique_values: List[str],
-        encoding_type: str = 'Likert',
+        encoding_type: str = 'Ordinal',
         start_value: int = 1,
         direction: str = 'Ascending',
         treat_missing: bool = True,
@@ -28,7 +28,7 @@ class ColumnConfig:
     ):
         self.column_name = column_name
         self.unique_values = unique_values  # Ordered list
-        self.encoding_type = encoding_type  # 'Likert', 'Nominal', 'Ignore'
+        self.encoding_type = encoding_type  # 'Ordinal', 'Nominal', 'Scale', 'Ignore'
         self.start_value = start_value
         self.direction = direction  # 'Ascending' or 'Descending'
         self.treat_missing = treat_missing
@@ -42,6 +42,10 @@ class ColumnConfig:
             Dictionary mapping original values to numeric codes
         """
         if self.encoding_type == 'Ignore':
+            return {}
+        
+        # Scale variables (continuous numeric) don't need encoding
+        if self.encoding_type == 'Scale':
             return {}
         
         mapping = {}
@@ -139,13 +143,30 @@ def apply_encoding(
 
 def save_encoded_excel(df: pd.DataFrame, output_path: str, sheet_name: str = 'Sheet1') -> None:
     """
-    Save encoded dataframe to Excel file.
+    Save encoded dataframe to Excel file in a format compatible with SPSS.
+    Uses xlsxwriter engine for better SPSS compatibility.
     
     Args:
         df: Encoded dataframe
         output_path: Path to output Excel file
         sheet_name: Name of sheet to create
     """
-    df.to_excel(output_path, sheet_name=sheet_name, index=False, engine='openpyxl')
+    # Use xlsxwriter for better SPSS compatibility
+    # Write with proper formatting to ensure SPSS can read it
+    with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
+        
+        # Get workbook and worksheet objects
+        workbook = writer.book
+        worksheet = writer.sheets[sheet_name]
+        
+        # Set column widths for readability
+        for idx, col in enumerate(df.columns):
+            max_len = max(
+                df[col].astype(str).apply(len).max(),
+                len(str(col))
+            )
+            worksheet.set_column(idx, idx, min(max_len + 2, 50))
+    
     logger.info(f"Saved encoded Excel to: {output_path}")
 

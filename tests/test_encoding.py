@@ -5,7 +5,7 @@ Run with: pytest tests/
 
 import pytest
 import pandas as pd
-from utils import sanitize_variable_name, format_spss_path, is_likely_likert, escape_spss_string
+from utils import sanitize_variable_name, format_spss_path, is_likely_likert, escape_spss_string, strip_bidi_characters
 from encoder import ColumnConfig, detect_columns, apply_encoding
 from sps_generator import generate_value_labels_block
 
@@ -22,7 +22,10 @@ class TestSanitizeVariableName:
     def test_starts_with_letter(self):
         """Test that names start with a letter."""
         assert sanitize_variable_name("123abc").startswith("v_")
-        assert sanitize_variable_name("_test").startswith("v_")
+        # Updated: leading underscores are stripped, so "_test" becomes "test"
+        assert sanitize_variable_name("_test") == "test"
+        # Empty after stripping should return fallback
+        assert sanitize_variable_name("___") == "var"
     
     def test_max_length(self):
         """Test truncation to max length."""
@@ -41,6 +44,38 @@ class TestSanitizeVariableName:
         assert sanitize_variable_name("50% complete") == "v_50_complete"
 
 
+class TestStripBidiCharacters:
+    """Tests for Unicode bidirectional character stripping."""
+    
+    def test_ltr_mark_removal(self):
+        """Test removal of LEFT-TO-RIGHT marks."""
+        text_with_ltr = "Sheet\u200E1\u200E"
+        assert strip_bidi_characters(text_with_ltr) == "Sheet1"
+    
+    def test_rtl_mark_removal(self):
+        """Test removal of RIGHT-TO-LEFT marks."""
+        text_with_rtl = "var\u200F1\u200F"
+        assert strip_bidi_characters(text_with_rtl) == "var1"
+    
+    def test_mixed_bidi_removal(self):
+        """Test removal of multiple bidi character types."""
+        text_with_mixed = "\u202Avar\u200E1\u202C"
+        assert strip_bidi_characters(text_with_mixed) == "var1"
+    
+    def test_arabic_text_preserved(self):
+        """Test that Arabic text is preserved while bidi marks are removed."""
+        text = "\u200Fموافق\u200E"
+        result = strip_bidi_characters(text)
+        assert result == "موافق"
+        assert "\u200F" not in result
+        assert "\u200E" not in result
+    
+    def test_no_bidi_characters(self):
+        """Test text without bidi characters is unchanged."""
+        assert strip_bidi_characters("Hello World") == "Hello World"
+        assert strip_bidi_characters("123") == "123"
+
+
 class TestEscapeSPSSString:
     """Tests for SPSS string escaping."""
     
@@ -53,6 +88,11 @@ class TestEscapeSPSSString:
         """Test strings without quotes."""
         assert escape_spss_string("Normal text") == "Normal text"
         assert escape_spss_string("123") == "123"
+    
+    def test_bidi_removal_in_escape(self):
+        """Test that bidi characters are removed during escaping."""
+        text_with_bidi = "It\u200E's\u200F great"
+        assert escape_spss_string(text_with_bidi) == "It''s great"
 
 
 class TestIsLikelyLikert:
@@ -79,7 +119,7 @@ class TestColumnConfig:
         config = ColumnConfig(
             column_name='q1',
             unique_values=['Low', 'Medium', 'High'],
-            encoding_type='Likert',
+            encoding_type='Ordinal',
             start_value=1,
             direction='Ascending'
         )
@@ -91,7 +131,7 @@ class TestColumnConfig:
         config = ColumnConfig(
             column_name='q1',
             unique_values=['Low', 'Medium', 'High'],
-            encoding_type='Likert',
+            encoding_type='Ordinal',
             start_value=1,
             direction='Descending'
         )
@@ -208,7 +248,7 @@ class TestApplyEncoding:
         config = ColumnConfig(
             column_name='Q1',
             unique_values=['Low', 'Medium', 'High'],
-            encoding_type='Likert',
+            encoding_type='Ordinal',
             start_value=1,
             direction='Ascending'
         )
@@ -227,7 +267,7 @@ class TestApplyEncoding:
         config = ColumnConfig(
             column_name='Q1',
             unique_values=['Low', 'High'],
-            encoding_type='Likert',
+            encoding_type='Ordinal',
             start_value=1,
             direction='Ascending'
         )

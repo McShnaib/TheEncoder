@@ -2,6 +2,33 @@
 
 ## Version History
 
+### v1.1.2 (Critical Bug Fix - SPSS Import)
+**Fixed:** Excel files now import correctly into SPSS without manual intervention.
+- Changed Excel engine from openpyxl to xlsxwriter for better SPSS compatibility
+- Added CD command to .sps files to set working directory
+- Added clear step-by-step instructions in both app UI and .sps files
+- Excel files no longer need to be manually opened/resaved before SPSS import
+- GET DATA Error 2052 resolved with proper directory setup
+- See `BUGFIX_v1.1.2_SPSS_Import.md` for complete details
+
+### v1.1.1 (Critical Bug Fix - Arabic Support)
+**Fixed:** SPSS syntax errors caused by invisible Unicode bidirectional formatting characters.
+- Added `strip_bidi_characters()` function to remove RTL/LTR marks and embeddings
+- Applied to sheet names, variable names, and all text in VALUE LABELS
+- Arabic (and other RTL languages) now work perfectly in SPSS
+- Added 6 new unit tests - all 26 tests passing
+- **Impact:** Makes Arabic surveys fully functional (was completely broken)
+- See `BUGFIX_v1.1.1_BidiCharacters.md` for technical details
+
+### v1.1.0 (Major Feature Update)
+**Added:** SPSS terminology alignment and Arabic language support improvements.
+- Changed UI from "Likert/Nominal" to SPSS "Ordinal/Nominal/Scale"
+- Added VARIABLE LEVEL command to set measure types automatically
+- Unique variable name generation for Arabic columns (var1, var2, etc.)
+- UTF-8 BOM encoding for Arabic text display
+- Relative paths in .sps files for easier portability
+- See `UPDATES_v1.1.0.md` for complete details
+
 ### v1.0.1 (Bug Fix)
 **Fixed:** VALUE LABELS and VARIABLE LABELS syntax now properly includes forward slashes (`/`) between variables.
 - SPSS requires forward slashes to separate variables in multi-variable label blocks
