@@ -16,23 +16,30 @@ def sanitize_variable_name(name: str, max_length: int = 64, fallback_prefix: str
     """
     Sanitize a column name to be SPSS-compatible.
     
+    SPSS supports Unicode characters (Arabic, Chinese, etc.) in variable names!
+    
     Rules:
-    - Must start with a letter
-    - Can only contain letters, digits, and underscores
+    - Must start with a letter (any Unicode letter, including Arabic)
+    - Can contain letters (any Unicode), digits, underscores, dots, @, #, $
     - Maximum length of 64 characters (SPSS limit)
-    - No spaces or special characters
-    - For non-ASCII names (e.g., Arabic), returns fallback_prefix
+    - Spaces and special punctuation become underscores
+    - Preserves Arabic, Hebrew, Chinese, and other Unicode text
     
     Args:
         name: Original column name
         max_length: Maximum allowed length (default 64)
-        fallback_prefix: Prefix to use if name has no ASCII chars (default "var")
+        fallback_prefix: Prefix to use if name is empty after sanitization
         
     Returns:
         Sanitized variable name
     """
-    # Replace spaces and special chars with underscore
-    sanitized = re.sub(r'[^a-zA-Z0-9_]', '_', name)
+    # Strip bidirectional formatting characters first
+    name = strip_bidi_characters(name)
+    
+    # Replace spaces and problematic punctuation with underscore
+    # Keep: letters (any Unicode), digits, underscore, dot, @, #, $
+    # SPSS actually allows these characters in variable names
+    sanitized = re.sub(r'[^\w@#$.]', '_', name, flags=re.UNICODE)
     
     # Remove consecutive underscores
     sanitized = re.sub(r'_+', '_', sanitized)
@@ -40,11 +47,11 @@ def sanitize_variable_name(name: str, max_length: int = 64, fallback_prefix: str
     # Strip leading/trailing underscores
     sanitized = sanitized.strip('_')
     
-    # If empty or only underscores (e.g., Arabic text), use fallback
+    # If empty after sanitization, use fallback
     if not sanitized:
         return fallback_prefix
     
-    # Ensure it starts with a letter
+    # Ensure it starts with a letter (any Unicode letter)
     if not sanitized[0].isalpha():
         sanitized = 'v_' + sanitized
     
@@ -60,7 +67,12 @@ def sanitize_variable_name(name: str, max_length: int = 64, fallback_prefix: str
 def generate_unique_var_names(column_names: List[str], max_length: int = 64) -> Dict[str, str]:
     """
     Generate unique SPSS-compatible variable names for a list of column names.
-    Handles non-ASCII names (e.g., Arabic) by assigning unique sequential names.
+    Preserves Unicode text (Arabic, Chinese, etc.) and adds numbers for duplicates.
+    
+    Examples:
+        "السؤال الأول" → "السؤال_الأول"
+        "Age Group" → "Age_Group"
+        "السؤال الأول" (duplicate) → "السؤال_الأول_1"
     
     Args:
         column_names: List of original column names
@@ -71,25 +83,25 @@ def generate_unique_var_names(column_names: List[str], max_length: int = 64) -> 
     """
     name_map = {}
     used_names = set()
-    var_counter = 1
     
     for original_name in column_names:
-        # Try to sanitize normally
-        sanitized = sanitize_variable_name(original_name, max_length, fallback_prefix=f"var{var_counter}")
+        # Sanitize the name (preserves Unicode)
+        base_name = sanitize_variable_name(original_name, max_length)
+        sanitized = base_name
         
-        # If this name was a fallback or already used, make it unique
-        if sanitized in used_names or sanitized.startswith('var') and len(sanitized) <= 6:
-            # Generate unique name
-            while f"var{var_counter}" in used_names:
-                var_counter += 1
-            sanitized = f"var{var_counter}"
-            var_counter += 1
-        elif sanitized == sanitize_variable_name(original_name, max_length, fallback_prefix="var"):
-            # This was likely a fallback, assign unique number
-            while f"var{var_counter}" in used_names:
-                var_counter += 1
-            sanitized = f"var{var_counter}"
-            var_counter += 1
+        # If name already exists, add _1, _2, etc.
+        if sanitized in used_names:
+            counter = 1
+            while True:
+                # Try with _1, _2, _3, etc.
+                suffix = f"_{counter}"
+                # Make sure we don't exceed max length
+                truncate_to = max_length - len(suffix)
+                sanitized = base_name[:truncate_to] + suffix
+                
+                if sanitized not in used_names:
+                    break
+                counter += 1
         
         used_names.add(sanitized)
         name_map[original_name] = sanitized

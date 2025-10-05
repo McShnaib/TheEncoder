@@ -5,7 +5,7 @@ Run with: pytest tests/
 
 import pytest
 import pandas as pd
-from utils import sanitize_variable_name, format_spss_path, is_likely_likert, escape_spss_string, strip_bidi_characters
+from utils import sanitize_variable_name, generate_unique_var_names, format_spss_path, is_likely_likert, escape_spss_string, strip_bidi_characters
 from encoder import ColumnConfig, detect_columns, apply_encoding
 from sps_generator import generate_value_labels_block
 
@@ -16,7 +16,7 @@ class TestSanitizeVariableName:
     def test_basic_sanitization(self):
         """Test basic character replacement."""
         assert sanitize_variable_name("My Question 1") == "My_Question_1"
-        assert sanitize_variable_name("Price ($)") == "Price"
+        assert sanitize_variable_name("Price ($)") == "Price_$"  # $ is allowed in SPSS
         assert sanitize_variable_name("First-Name") == "First_Name"
     
     def test_starts_with_letter(self):
@@ -40,8 +40,60 @@ class TestSanitizeVariableName:
     
     def test_special_characters(self):
         """Test handling of special characters."""
-        assert sanitize_variable_name("email@domain.com") == "email_domain_com"
+        assert sanitize_variable_name("email@domain.com") == "email@domain.com"  # @ is allowed in SPSS
         assert sanitize_variable_name("50% complete") == "v_50_complete"
+    
+    def test_arabic_text_preserved(self):
+        """Test that Arabic text is preserved in variable names."""
+        assert sanitize_variable_name("السؤال الأول") == "السؤال_الأول"
+        assert sanitize_variable_name("العمر") == "العمر"
+        assert sanitize_variable_name("الجنس") == "الجنس"
+    
+    def test_mixed_arabic_english(self):
+        """Test mixed Arabic and English text."""
+        assert sanitize_variable_name("Question السؤال 1") == "Question_السؤال_1"
+        assert sanitize_variable_name("Age العمر") == "Age_العمر"
+    
+    def test_arabic_with_numbers(self):
+        """Test Arabic text with numbers."""
+        assert sanitize_variable_name("السؤال 1") == "السؤال_1"
+        assert sanitize_variable_name("الفئة 20-35") == "الفئة_20_35"
+
+
+class TestGenerateUniqueVarNames:
+    """Tests for unique variable name generation."""
+    
+    def test_basic_unique_names(self):
+        """Test basic unique name generation."""
+        columns = ["Age", "Gender", "Income"]
+        result = generate_unique_var_names(columns)
+        assert result["Age"] == "Age"
+        assert result["Gender"] == "Gender"
+        assert result["Income"] == "Income"
+    
+    def test_arabic_names_preserved(self):
+        """Test that Arabic names are preserved."""
+        columns = ["السؤال الأول", "السؤال الثاني", "العمر"]
+        result = generate_unique_var_names(columns)
+        assert result["السؤال الأول"] == "السؤال_الأول"
+        assert result["السؤال الثاني"] == "السؤال_الثاني"
+        assert result["العمر"] == "العمر"
+    
+    def test_spaces_become_underscores(self):
+        """Test that spaces are converted to underscores."""
+        columns = ["Age Group", "Income Level", "Education Status"]
+        result = generate_unique_var_names(columns)
+        assert result["Age Group"] == "Age_Group"
+        assert result["Income Level"] == "Income_Level"
+        assert result["Education Status"] == "Education_Status"
+    
+    def test_mixed_language_names(self):
+        """Test mixed Arabic and English names."""
+        columns = ["Age العمر", "Gender الجنس", "السؤال 1"]
+        result = generate_unique_var_names(columns)
+        assert result["Age العمر"] == "Age_العمر"
+        assert result["Gender الجنس"] == "Gender_الجنس"
+        assert result["السؤال 1"] == "السؤال_1"
 
 
 class TestStripBidiCharacters:

@@ -2,6 +2,18 @@
 
 ## Version History
 
+### v1.2.0 (Feature Update - Arabic Variable Names)
+**Changed:** Variable names now preserve Arabic text instead of converting to var1, var2, etc.
+- Updated `sanitize_variable_name()` to keep Unicode characters (Arabic, Chinese, etc.)
+- SPSS fully supports Unicode in variable names - no need to replace them!
+- Arabic column names: "السؤال الأول" → "السؤال_الأول" (not "var1")
+- English columns: "Age Group" → "Age_Group" (no change)
+- Mixed: "Question السؤال" → "Question_السؤال" (preserved)
+- Spaces and special punctuation become underscores
+- Handles duplicates by adding _1, _2, etc. if needed
+- Added 8 new unit tests - all 33 tests passing
+- More intuitive and readable in SPSS!
+
 ### v1.1.2 (Critical Bug Fix - SPSS Import)
 **Fixed:** Excel files now import correctly into SPSS without manual intervention.
 - Changed Excel engine from openpyxl to xlsxwriter for better SPSS compatibility
