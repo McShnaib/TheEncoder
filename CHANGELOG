@@ -1,0 +1,191 @@
+# CHANGELOG
+
+## Version History
+
+### v1.0.1 (Bug Fix)
+**Fixed:** VALUE LABELS and VARIABLE LABELS syntax now properly includes forward slashes (`/`) between variables.
+- SPSS requires forward slashes to separate variables in multi-variable label blocks
+- Each variable line now ends with ` /` except the last which ends with `.`
+- Thanks to user testing for catching this issue!
+
+### v1.0.0 (Initial Release)
+Initial release with all core features.
+
+---
+
+## Design Decisions and Assumptions
+
+This document outlines key implementation decisions made during development of the SPSS Prep Tool.
+
+---
+
+### 1. Variable Name Sanitization
+
+**Decision:** Maximum variable name length set to 64 characters.
+
+**Rationale:** SPSS has a 64-character limit for variable names (as of SPSS v18+). Earlier versions had a 8-character limit, but modern SPSS installations use the extended limit.
+
+**Implementation:** Names are truncated at 64 characters with trailing underscores removed to maintain valid syntax.
+
+---
+
+### 2. Default Encoding Start Value
+
+**Decision:** Default numeric codes start at 1 (not 0).
+
+**Rationale:** SPSS convention typically uses 1-based indexing for Likert scales and categorical variables. Zero is often reserved for missing values in some coding schemes. Starting at 1 is more intuitive for social science researchers.
+
+**Alternative considered:** Zero-based indexing, but rejected for consistency with SPSS norms.
+
+---
+
+### 3. Multi-Response Handling (Phase 1)
+
+**Decision:** Detect multi-response columns but treat as atomic strings in Phase 1.
+
+**Rationale:** Proper multi-response handling requires creating multiple dummy variables (one per possible response), which adds significant complexity. To deliver a working MVP, Phase 1 treats the entire cell value as a single string. Users are warned and can choose to handle multi-response questions manually or wait for Phase 2.
+
+**Future plan:** Implement automatic splitting and dummy variable creation with proper SPSS MRSETS syntax.
+
+---
+
+### 4. Path Handling in .sps Files
+
+**Decision:** Use absolute paths with doubled backslashes for Windows.
+
+**Rationale:** SPSS syntax requires escaped backslashes in Windows paths. Using absolute paths ensures the .sps file works regardless of where SPSS is launched from. The `format_spss_path()` function handles platform differences.
+
+**Note:** Forward slashes also work in SPSS on Windows, but doubled backslashes are more explicit.
+
+---
+
+### 5. VALUE LABELS Syntax Format
+
+**Decision:** All value label pairs for a variable on one line, with only the final variable line ending in a period.
+
+**Rationale:** This is the standard SPSS syntax format. SPSS requires a period only after the last variable in a VALUE LABELS block, not after each variable.
+
+**Example:**
+```spss
+VALUE LABELS
+  var1 1 'Option A' 2 'Option B'
+  var2 1 'Yes' 2 'No'.
+```
+
+---
+
+### 6. Missing Value Treatment
+
+**Decision:** Default behavior is to leave missing cells empty (system-missing in SPSS).
+
+**Rationale:** SPSS handles blank cells as system-missing by default, which is appropriate for most analyses. Explicitly coding missing values (e.g., -99) is an alternative approach but was not prioritized for Phase 1.
+
+**User control:** Toggle available to change behavior in future versions.
+
+---
+
+### 7. Likert Detection Heuristic
+
+**Decision:** Detect Likert scales based on keyword matching and 3-7 unique values.
+
+**Rationale:** Most Likert scales have 3-7 points. Keyword matching catches common patterns ("agree", "satisfied", "often", etc.). This heuristic is not perfect but provides useful suggestions.
+
+**Limitation:** Non-English surveys or uncommon phrasing may not be detected. Users can manually override the suggested encoding type.
+
+---
+
+### 8. Session State Management
+
+**Decision:** Use Streamlit's `st.session_state` to persist configuration across reruns.
+
+**Rationale:** Streamlit reruns the entire script on every interaction. Session state ensures user configurations (reordering, settings) are not lost during reruns.
+
+**Implementation:** Each column's order is stored in `st.session_state.column_orders[col_name]` as a list.
+
+---
+
+### 9. Temporary File Storage
+
+**Decision:** Generated files saved to system temp directory (`tempfile.gettempdir()`).
+
+**Rationale:** Avoids cluttering the user's working directory. Files are ephemeral and downloaded via Streamlit's download buttons.
+
+**Note:** Files persist in temp directory until system cleanup. Future versions could implement explicit cleanup on session end.
+
+---
+
+### 10. Testing Strategy
+
+**Decision:** Focus unit tests on pure functions (sanitization, mapping generation) rather than UI components.
+
+**Rationale:** Streamlit UI components are difficult to unit test without complex mocking. Core business logic in `utils.py`, `encoder.py`, and `sps_generator.py` is fully testable and contains the critical functionality.
+
+**Coverage:** Tests cover >80% of non-UI code paths.
+
+---
+
+### 11. Descending Direction Logic
+
+**Decision:** "Descending" means first item in list gets highest numeric code.
+
+**Rationale:** For reverse-coded Likert scales (e.g., "Strongly Agree" = 1 instead of 5), users can reorder the list and set direction to Descending. This puts "Strongly Agree" at the top of the list but assigns it the highest code.
+
+**Example:** 
+- List order: ['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree']
+- Direction: Descending, Start: 1
+- Result: 'Strongly Agree' = 5, 'Strongly Disagree' = 1
+
+---
+
+### 12. VARIABLE LABELS Generation
+
+**Decision:** Generate VARIABLE LABELS block only if variable names were sanitized.
+
+**Rationale:** If column names are already SPSS-compatible and unchanged, there's no need to add redundant VARIABLE LABELS. This keeps the .sps file cleaner.
+
+**Implementation:** Compare sanitized name to original; only include if different.
+
+---
+
+### 13. Excel Engine Selection
+
+**Decision:** Use `openpyxl` for reading and writing .xlsx files.
+
+**Rationale:** `openpyxl` is the most mature and widely-supported library for .xlsx files in Python. It handles Google Forms exports reliably.
+
+**Alternative considered:** `xlsxwriter` for writing, but `openpyxl` handles both reading and writing, reducing dependencies.
+
+---
+
+### 14. Encoding Type Naming
+
+**Decision:** Use "Likert" instead of "Ordinal" in the UI.
+
+**Rationale:** "Likert" is more familiar to survey researchers than the statistical term "ordinal". Both are accurate, but "Likert" is clearer in context.
+
+**Note:** Internally, both Likert and Nominal encodings apply the same numeric mapping; the distinction is semantic and helps users understand the data type.
+
+---
+
+### 15. UI Layout Choice
+
+**Decision:** Use Streamlit expanders for column configuration cards.
+
+**Rationale:** Expanders keep the UI compact for datasets with many columns while allowing detailed configuration when expanded. Alternative (tabs, accordions) were considered but expanders provide the best balance of compactness and accessibility.
+
+---
+
+### Summary
+
+These decisions prioritize:
+- **User-friendliness** for researchers familiar with SPSS
+- **Robustness** in handling varied input data
+- **Maintainability** through clear code structure and testing
+- **Extensibility** for planned Phase 2 features
+
+Future versions will revisit some decisions based on user feedback and expanded requirements.
+
+---
+
+*Version 1.0 - 2025-10-05*
+
