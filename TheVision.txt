@@ -1,0 +1,36 @@
+## this will be a tool which is used to help in data analysis with IBM SPSS software
+
+### problem statement:
+- spss is mainly used to analyzze surveys which are mostly created using Google Forms, then the data is extracted as an excel file to be analyzed using SPSS
+
+- data extracted from google forms is strings as the survey options are all strings
+
+- here comes the problem, in spss in order to analyse data for something different than frequencies (like regression etc) the data to be analysed must be in numeric form rather than strings
+
+- also the numeric representation of each option cant be arbitrary as shown in the example below (agree cant be 1 as this will be a likert scale)
+
+### Current situation:
+currenlty data analysits do the following,
+first they need to replace all the options with numbers in excel using the find and replace tool
+then they import the data into spss 
+then for in the variable view they will need to define the variables so it can be readable for them 
+
+#### for example:
+in excel they do the following replacments:
+Disagree -> 1
+Neutral -> 2
+Agree -> 3
+
+then in spss they need to do the opposite in the varibale view:
+1 -> Disagree
+2 -> Neutral
+3 -> Agree
+
+
+### Proposed solution:
+1. this tool takes the excel file extracted from google forms as an input
+2. for each column it recognizes the options 
+3. it prompts the user for each column to arrange the options detected from (for example highest to lowest)
+4. it encodes the data and generates a new excel
+5. the excel sheet is imported to spss (automatically if possible)
+6. then the encoded options are added in reverse (as shown in the example above) in the value column in the variable view for each question
