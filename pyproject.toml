@@ -1,74 +1,13 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+# SPSS Prep Tool Configuration
+# Simple configuration file for tool settings and quality checks
 
 [project]
 name = "spss-prep-tool"
 version = "1.2.0"
-authors = [
-    {name = "SPSS Prep Tool Contributors"},
-]
 description = "A Streamlit web application for preparing Google Forms Excel exports for IBM SPSS analysis"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Utilities",
-]
-keywords = [
-    "spss",
-    "data-analysis", 
-    "survey-research",
-    "google-forms",
-    "data-preparation",
-    "streamlit",
-]
-dependencies = [
-    "pandas>=2.0.0",
-    "openpyxl>=3.1.0", 
-    "xlsxwriter>=3.1.0",
-    "streamlit>=1.28.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
-    "isort>=5.12.0",
-    "mypy>=1.5.0",
-    "pre-commit>=3.0.0",
-    "safety>=2.3.0",
-    "bandit>=1.7.0",
-]
-test = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-]
-
-[project.urls]
-"Homepage" = "https://github.com/your-org/spss-prep-tool"
-"Bug Reports" = "https://github.com/your-org/spss-prep-tool/issues"
-"Source" = "https://github.com/your-org/spss-prep-tool"
-"Documentation" = "https://github.com/your-org/spss-prep-tool#readme"
-
-# No scripts - use: streamlit run src/spss_prep/app.py
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
 
 [tool.black]
 line-length = 88
