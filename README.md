@@ -1,6 +1,5 @@
 # SPSS Prep Tool
 
-[![CI](https://github.com/your-org/spss-prep-tool/workflows/CI/badge.svg)](https://github.com/your-org/spss-prep-tool/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
