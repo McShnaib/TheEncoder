@@ -303,7 +303,7 @@ We welcome contributions from the community! Whether you're fixing bugs, adding 
 1. 🍴 **Fork the repository** on GitHub
 2. 🔧 **Set up your development environment:**
    ```bash
-   git clone https://github.com/your-username/spss-prep-tool.git
+   git clone https://github.com/McShnaib/spss-prep-tool.git
    cd spss-prep-tool
    python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
