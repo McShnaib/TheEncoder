@@ -16,19 +16,7 @@ This guide provides detailed installation instructions for SPSS Prep Tool across
 
 ## 🚀 Installation Methods
 
-### Method 1: PyPI Installation (Recommended for Users)
-
-This is the easiest way for end users who just want to use the tool:
-
-```bash
-# Install from PyPI
-pip install spss-prep-tool
-
-# Run the application
-spss-prep-tool
-```
-
-### Method 2: Source Installation (For Contributors)
+### Method 1: Source Installation
 
 This method is recommended for developers who want to contribute or modify the code:
 
@@ -53,13 +41,11 @@ source venv/bin/activate
 #### Step 3: Install Dependencies
 ```bash
 # For regular usage
-pip install -e .
+pip install -r requirements.txt
 
 # For development (includes testing, linting, etc.)
-pip install -e ".[dev]"
-
-# For testing only
-pip install -e ".[test]"
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 #### Step 4: Set Up Pre-commit Hooks (Optional)
@@ -69,11 +55,7 @@ pre-commit install
 
 #### Step 5: Run the Application
 ```bash
-# Method 1: Direct execution
 streamlit run src/spss_prep/app.py
-
-# Method 2: Using entry point
-spss-prep-tool
 ```
 
 ## 🐳 Docker Installation (Alternative)
@@ -148,8 +130,9 @@ cd spss-prep-tool
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install all development dependencies
-pip install -e ".[dev]"
+# Install all dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 # Set up pre-commit hooks
 pre-commit install
@@ -173,9 +156,9 @@ streamlit run src/spss_prep/app.py
 
 After installation, verify everything works:
 
-### 1. Check Version
+### 1. Check Installation
 ```bash
-python -c "import spss_prep; print(spss_prep.__version__)"
+python -c "import streamlit; import pandas; print('Dependencies installed successfully')"
 ```
 
 ### 2. Run Tests (Development Installation)
@@ -185,7 +168,7 @@ pytest tests/ -v
 
 ### 3. Start Application
 ```bash
-spss-prep-tool
+streamlit run src/spss_prep/app.py
 ```
 - Should open browser to `http://localhost:8501`
 - Try uploading `sample_input.xlsx`
@@ -199,8 +182,8 @@ spss-prep-tool
 # Make sure you're in the right directory
 cd spss-prep-tool
 
-# Reinstall in development mode
-pip install -e .
+# Reinstall dependencies
+pip install -r requirements.txt
 ```
 
 #### Streamlit won't start
@@ -214,7 +197,7 @@ pip install --upgrade streamlit
 
 #### Permission errors on Windows
 - Run Command Prompt as Administrator
-- Or install for user only: `pip install --user spss-prep-tool`
+- Or install for user only: `pip install --user -r requirements.txt`
 
 #### Python version conflicts
 ```bash
@@ -222,7 +205,7 @@ pip install --upgrade streamlit
 python --version
 
 # Use specific Python version
-python3.11 -m pip install spss-prep-tool
+python3.11 -m pip install -r requirements.txt
 ```
 
 ### Getting Help
@@ -236,26 +219,17 @@ If you encounter issues:
 
 ## 🔄 Updating
 
-### Update from PyPI
-```bash
-pip install --upgrade spss-prep-tool
-```
-
 ### Update from Source
 ```bash
 cd spss-prep-tool
 git pull origin main
-pip install -e ".[dev]"
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ## 🗑️ Uninstalling
 
-### Remove PyPI Installation
-```bash
-pip uninstall spss-prep-tool
-```
-
-### Remove Source Installation
+### Remove Installation
 ```bash
 # Deactivate virtual environment
 deactivate

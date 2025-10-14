@@ -13,16 +13,6 @@ __url__ = "https://github.com/your-org/spss-prep-tool"
 __all__ = ["encoder", "sps_generator", "utils", "app"]
 
 
-def main():
-    """Entry point for the SPSS Prep Tool application."""
-    import sys
-    import subprocess
-    from pathlib import Path
-    
-    # Get the path to app.py in the same directory
-    app_path = Path(__file__).parent / "app.py"
-    
-    # Run streamlit with the app
-    sys.exit(subprocess.call(["streamlit", "run", str(app_path)] + sys.argv[1:]))
+# Entry point removed - use: streamlit run src/spss_prep/app.py
 
 

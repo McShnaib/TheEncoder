@@ -4,12 +4,23 @@ This directory contains additional project documentation and historical files.
 
 ## 📚 Contents
 
-### Core Documentation
+### User Documentation
+- **QUICKSTART.md** - Quick 3-minute getting started guide
+- **INSTALL.md** - Comprehensive installation instructions for all platforms
+- **CONTRIBUTING.md** - Guidelines for contributing to the project
+- **CODE_OF_CONDUCT.md** - Community standards and behavior guidelines
+- **SECURITY.md** - Security policy and vulnerability reporting
+
+### Developer Documentation
 - **BUILD_INSTRUCTIONS.md** - Instructions for building executable versions
 - **PROJECT_SUMMARY.md** - Comprehensive project overview and completion status  
 - **README_EXE_DISTRIBUTION.md** - Documentation for executable distribution
+- **TODO.md** - Project roadmap and planned features
 - **TheVision.txt** - Original project vision and goals
-- **CHANGELOG** - Legacy changelog (superseded by root CHANGELOG.md)
+
+### Version History
+- **CHANGELOG.md** - Current changelog with semantic versioning
+- **CHANGELOG** - Legacy changelog (historical reference)
 
 ### Release History
 - **releases/** - Detailed documentation for each version release

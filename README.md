@@ -16,15 +16,6 @@ A **Streamlit web application** for automating the preparation of Google Forms E
 
 ### Installation
 
-#### Option 1: Install from PyPI (Recommended)
-
-```bash
-pip install spss-prep-tool
-spss-prep-tool
-```
-
-#### Option 2: Install from Source
-
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/your-org/spss-prep-tool.git
@@ -37,9 +28,9 @@ spss-prep-tool
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Install in development mode:**
+3. **Install dependencies:**
    ```bash
-   pip install -e ".[dev]"
+   pip install -r requirements.txt
    ```
 
 4. **Run the application:**
@@ -53,7 +44,7 @@ spss-prep-tool
 
 Try it with the included sample data:
 ```bash
-# After installation, upload sample_input.xlsx in the web interface
+# After installation, upload examples/sample_input.xlsx in the web interface
 ```
 
 ---
@@ -335,11 +326,11 @@ We welcome contributions from the community! Whether you're fixing bugs, adding 
 - 🧪 **More test coverage**
 - 🎨 **UI/UX improvements**
 
-For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For detailed guidelines, see [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ### Code of Conduct
 
-Please note that this project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
+Please note that this project is governed by our [Code of Conduct](docs/CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
 
 ---
 
@@ -347,10 +338,10 @@ Please note that this project is governed by our [Code of Conduct](CODE_OF_CONDU
 
 ### Getting Help
 
-- 📖 **Documentation**: Start with this README and [QUICKSTART.md](QUICKSTART.md)
+- 📖 **Documentation**: Start with this README and [QUICKSTART.md](docs/QUICKSTART.md)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-org/spss-prep-tool/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/your-org/spss-prep-tool/discussions)
-- 🏗️ **Development**: See [TODO.md](TODO.md) for roadmap and [CHANGELOG](CHANGELOG) for recent changes
+- 🏗️ **Development**: See [TODO.md](docs/TODO.md) for roadmap and [CHANGELOG](docs/CHANGELOG.md) for recent changes
 
 ### Community
 

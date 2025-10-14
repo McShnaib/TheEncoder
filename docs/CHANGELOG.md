@@ -155,7 +155,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 3. Create and merge pull request
 4. Tag release: `git tag -a v1.2.1 -m "Release version 1.2.1"`
 5. Push tag: `git push origin v1.2.1`
-6. GitHub Actions will automatically create release and publish to PyPI
+6. GitHub Actions will automatically create release
 
 ### Change Categories
 - **Added** for new features
