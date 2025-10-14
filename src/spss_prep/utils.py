@@ -229,3 +229,4 @@ def escape_spss_string(text: str) -> str:
     # Replace single quotes with two single quotes (SPSS convention)
     return clean_text.replace("'", "''")
 
+

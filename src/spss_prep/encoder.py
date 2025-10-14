@@ -170,3 +170,4 @@ def save_encoded_excel(df: pd.DataFrame, output_path: str, sheet_name: str = 'Sh
     
     logger.info(f"Saved encoded Excel to: {output_path}")
 
+

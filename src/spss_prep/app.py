@@ -23,9 +23,9 @@ import tempfile
 from typing import Dict, List, Optional
 import logging
 
-from encoder import detect_columns, ColumnConfig, apply_encoding, save_encoded_excel
-from sps_generator import generate_sps_syntax, save_sps_file
-from utils import sanitize_variable_name, generate_unique_var_names, is_likely_likert, is_multi_response
+from .encoder import detect_columns, ColumnConfig, apply_encoding, save_encoded_excel
+from .sps_generator import generate_sps_syntax, save_sps_file
+from .utils import sanitize_variable_name, generate_unique_var_names, is_likely_likert, is_multi_response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -507,4 +507,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
 

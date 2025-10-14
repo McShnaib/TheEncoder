@@ -4,7 +4,7 @@ Creates GET DATA, VALUE LABELS, and SAVE OUTFILE blocks.
 """
 
 from typing import Dict, List, Optional
-from utils import format_spss_path, escape_spss_string, sanitize_variable_name, strip_bidi_characters
+from .utils import format_spss_path, escape_spss_string, sanitize_variable_name, strip_bidi_characters
 import logging
 import os
 
@@ -256,4 +256,5 @@ def save_sps_file(syntax: str, output_path: str) -> None:
     with open(output_path, 'w', encoding='utf-8-sig') as f:
         f.write(syntax)
     logger.info(f"Saved SPSS syntax to: {output_path}")
+
 

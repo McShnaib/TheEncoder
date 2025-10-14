@@ -1,6 +1,14 @@
 # SPSS Prep Tool
 
+[![CI](https://github.com/your-org/spss-prep-tool/workflows/CI/badge.svg)](https://github.com/your-org/spss-prep-tool/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=Streamlit&logoColor=white)](https://streamlit.io/)
+
 A **Streamlit web application** for automating the preparation of Google Forms Excel exports for analysis in **IBM SPSS**. This tool detects categorical options, allows users to configure and reorder them, encodes them into numeric codes, and generates both an encoded Excel file and an SPSS syntax file (`.sps`) for seamless import.
+
+🎯 **Perfect for researchers, data analysts, and students working with survey data!**
 
 ---
 
@@ -8,21 +16,45 @@ A **Streamlit web application** for automating the preparation of Google Forms E
 
 ### Installation
 
-1. **Clone or download this repository**
-
-2. **Install dependencies:**
+#### Option 1: Install from PyPI (Recommended)
 
 ```bash
-pip install -r requirements.txt
+pip install spss-prep-tool
+spss-prep-tool
 ```
 
-3. **Run the application:**
+#### Option 2: Install from Source
 
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-org/spss-prep-tool.git
+   cd spss-prep-tool
+   ```
+
+2. **Create a virtual environment (recommended):**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install in development mode:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+4. **Run the application:**
+   ```bash
+   streamlit run src/spss_prep/app.py
+   ```
+
+5. **Open your browser** to the URL shown (typically `http://localhost:8501`)
+
+#### Quick Demo
+
+Try it with the included sample data:
 ```bash
-streamlit run app.py
+# After installation, upload sample_input.xlsx in the web interface
 ```
-
-4. **Open your browser** to the URL shown (typically `http://localhost:8501`)
 
 ---
 
@@ -133,21 +165,32 @@ For each detected column, the app shows an expandable configuration card where y
 
 ---
 
-## 📁 File Structure
+## 📁 Project Structure
 
 ```
-spss_prep/
-├── app.py                    # Main Streamlit application
-├── encoder.py                # Encoding logic and detection
-├── sps_generator.py          # SPSS syntax generation
-├── utils.py                  # Helper utilities
-├── requirements.txt          # Python dependencies
-├── README.md                 # This file
-├── TODO.md                   # Project TODO list
-├── CHANGELOG                 # Design decisions log
-├── sample_input.xlsx         # Sample data file
-└── tests/
-    └── test_encoding.py      # Unit tests
+spss-prep-tool/
+├── src/
+│   └── spss_prep/            # Main package
+│       ├── __init__.py
+│       ├── app.py            # Streamlit application
+│       ├── encoder.py        # Data encoding logic
+│       ├── sps_generator.py  # SPSS syntax generation
+│       └── utils.py          # Helper utilities
+├── tests/                    # Test suite
+│   └── test_encoding.py      # Unit tests
+├── .github/workflows/        # CI/CD automation
+├── docs/                     # Documentation
+├── examples/                 # Example files
+├── sample_input.xlsx         # Sample survey data
+├── requirements.txt          # Runtime dependencies
+├── requirements-dev.txt      # Development dependencies
+├── pyproject.toml           # Package configuration
+├── LICENSE                  # MIT License
+├── README.md               # This documentation
+├── CONTRIBUTING.md         # Contribution guidelines
+├── CODE_OF_CONDUCT.md      # Community standards
+├── CHANGELOG              # Version history
+└── TODO.md                # Development roadmap
 ```
 
 ---
@@ -237,35 +280,106 @@ See `TODO.md` for planned improvements.
 
 ## 📝 License
 
-This tool is provided as-is for educational and research purposes.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### What this means:
+- ✅ **Free to use** for personal and commercial projects
+- ✅ **Free to modify** and distribute
+- ✅ **No warranty** - use at your own risk
+- ✅ **Attribution required** - please keep the license notice
+
+### Citation
+
+If you use this tool in academic research, please cite:
+
+```bibtex
+@software{spss_prep_tool,
+  title = {SPSS Prep Tool: Automated Survey Data Preparation},
+  author = {SPSS Prep Tool Contributors},
+  year = {2025},
+  url = {https://github.com/your-org/spss-prep-tool},
+  version = {1.2.0}
+}
+```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+We welcome contributions from the community! Whether you're fixing bugs, adding features, improving documentation, or reporting issues, your help is appreciated.
+
+### Quick Start for Contributors
+
+1. 🍴 **Fork the repository** on GitHub
+2. 🔧 **Set up your development environment:**
+   ```bash
+   git clone https://github.com/your-username/spss-prep-tool.git
+   cd spss-prep-tool
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   pip install -e ".[dev]"
+   pre-commit install
+   ```
+3. 🌟 **Create a feature branch:** `git checkout -b feature/amazing-feature`
+4. ✅ **Make your changes and add tests**
+5. 🧪 **Run tests:** `pytest tests/ -v`
+6. 📝 **Update documentation** if needed
+7. 🚀 **Submit a pull request**
+
+### What We Need Help With
+
+- 🐛 **Bug reports** and fixes
+- ✨ **New features** (see our [TODO.md](TODO.md))
+- 🌐 **Internationalization** (especially for non-English surveys)
+- 📚 **Documentation** improvements
+- 🧪 **More test coverage**
+- 🎨 **UI/UX improvements**
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Code of Conduct
+
+Please note that this project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
 
 ---
 
-## 📧 Support
+## 📧 Support & Community
 
-For issues or questions, please check:
-- `TODO.md` for known limitations
-- `CHANGELOG` for recent changes
-- Test files for usage examples
+### Getting Help
+
+- 📖 **Documentation**: Start with this README and [QUICKSTART.md](QUICKSTART.md)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-org/spss-prep-tool/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/your-org/spss-prep-tool/discussions)
+- 🏗️ **Development**: See [TODO.md](TODO.md) for roadmap and [CHANGELOG](CHANGELOG) for recent changes
+
+### Community
+
+- 🌟 **Star the project** if you find it useful!
+- 🐦 **Share** with your research community
+- 📢 **Spread the word** about SPSS Prep Tool
+
+### Commercial Support
+
+For organizations needing custom features, training, or consulting services, please open an issue with the "commercial-support" label.
 
 ---
 
 ## 🙏 Acknowledgments
 
-Built with:
+Built with ❤️ and:
 - [Streamlit](https://streamlit.io/) - Web application framework
-- [Pandas](https://pandas.pydata.org/) - Data manipulation
+- [Pandas](https://pandas.pydata.org/) - Data manipulation and analysis
 - [OpenPyXL](https://openpyxl.readthedocs.io/) - Excel file handling
+- [Python](https://python.org/) - The programming language that makes it all possible
+
+Special thanks to:
+- The research community for feedback and suggestions
+- Contributors who made this tool better
+- The open-source ecosystem that makes projects like this possible
+
+### Inspiration
+
+This tool was created to bridge the gap between modern survey platforms (like Google Forms) and traditional statistical software (like SPSS), making data analysis more accessible to researchers worldwide.
 
 ---
 
